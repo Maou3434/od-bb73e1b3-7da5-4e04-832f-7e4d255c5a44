@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Switcher Prototype</title>
+    <style>
+        :root {
+            /* Modern Minimal Palette */
+            --bg: oklch(99% 0.002 240);
+            --surface: oklch(100% 0 0);
+            --fg: oklch(18% 0.012 250);
+            --muted: oklch(54% 0.012 250);
+            --border: oklch(92% 0.005 250);
+            --accent: oklch(58% 0.18 255);
+
+            --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+            --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+            --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: var(--font-body);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+        }
+
+        button {
+            background-color: var(--fg);
+            color: var(--surface);
+            border: none;
+            padding: 1.25rem 2.5rem;
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            margin-bottom: 2rem;
+            user-select: none;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            background-color: oklch(25% 0.012 250);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: inline-flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .value {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+            color: var(--fg);
+        }
+
+        .value:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2.5rem;
+            background: var(--fg);
+            color: var(--surface);
+            padding: 0.6rem 1.25rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(1rem);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <button id="colorBtn">Randomize Background</button>
+        <br>
+        <div class="info">
+            <span class="label">Current Hex / OKLch</span>
+            <span id="colorValue" class="value">oklch(99% 0.002 240)</span>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Copied to clipboard</div>
+
+    <script>
+        const btn = document.getElementById('colorBtn');
+        const valueDisplay = document.getElementById('colorValue');
+        const toast = document.getElementById('toast');
+
+        function getRandomColor() {
+            // Constrain L and C for aesthetic consistency
+            // L: 75% to 95% (pastel-ish lightness)
+            // C: 0.04 to 0.12 (muted, minimal saturation)
+            // H: 0 to 360 (full hue spectrum)
+            const l = (Math.random() * 20 + 75).toFixed(1);
+            const c = (Math.random() * 0.08 + 0.04).toFixed(3);
+            const h = Math.floor(Math.random() * 360);
+            
+            return `oklch(${l}% ${c} ${h})`;
+        }
+
+        btn.addEventListener('click', () => {
+            const newColor = getRandomColor();
+            document.body.style.backgroundColor = newColor;
+            valueDisplay.textContent = newColor;
+        });
+
+        valueDisplay.addEventListener('click', () => {
+            navigator.clipboard.writeText(valueDisplay.textContent).then(() => {
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            });
+        });
+
+        // Initialize with a random color
+        btn.click();
+    </script>
+</body>
+</html>
